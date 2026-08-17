@@ -62,4 +62,4 @@ Desenvolvido por **♱ skrdkrt**.
 
 ## 📄 Licença
 
-[MIT Licence](Licence)
+Esse projeto está disponível sob a [MIT License](LICENSE)
