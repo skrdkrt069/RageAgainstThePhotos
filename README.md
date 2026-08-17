@@ -39,7 +39,7 @@ A versão mais recente está disponível na página de Releases.
 ## 💻 Requisitos
 
 - Windows
-- [.NET 10.0]
+- .NET 10.0 Runtime
 
 ## 📖 Changelog
 
