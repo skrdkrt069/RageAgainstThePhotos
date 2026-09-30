@@ -79,7 +79,6 @@ namespace RageAgainstThePhotos
             cmbFormat.Items.Add("png");
             cmbFormat.Items.Add("jpg");
             cmbFormat.Items.Add("webp");
-            cmbFormat.Items.Add("heic");
             cmbFormat.Items.Add("avif");
             cmbFormat.Items.Add("bmp");
             cmbFormat.Items.Add("ico");
@@ -370,9 +369,9 @@ namespace RageAgainstThePhotos
 
                 string originalExtension = extension.TrimStart('.');
 
-                string selectedFormat = "png";
+                string selectedFormat;
 
-                string icoSize = "Automático";
+                string icoSize;
 
                 if (fromContextMenu)
                 {
@@ -384,17 +383,13 @@ namespace RageAgainstThePhotos
                     if (cancelledBatchExtensions.Contains(preferenceExtension))
                         continue;
 
-                    if (batchChoices.TryGetValue(
-                        preferenceExtension,
-                        out var batchChoice))
+                    if (batchChoices.TryGetValue(preferenceExtension,out var batchChoice))
                     {
                         selectedFormat = batchChoice.Format;
                         icoSize = batchChoice.IcoSize;
                     }
 
-                    else if (TryGetDefaultConversion(
-                        preferenceExtension,
-                        out string defaultFormat))
+                    else if (TryGetDefaultConversion(preferenceExtension, out string defaultFormat))
                     {
                         selectedFormat = defaultFormat;
                         icoSize = "Automático";
@@ -428,6 +423,13 @@ namespace RageAgainstThePhotos
                             }
                         }
                     }
+                }
+                else
+                {
+                    selectedFormat =
+                        cmbFormat.SelectedItem?.ToString()?.ToLower() ?? "png";
+
+                    icoSize = cmbIcoSize.Text;
                 }
 
                 tasks.Add(Task.Run(async () =>
