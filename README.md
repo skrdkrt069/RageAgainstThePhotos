@@ -8,7 +8,7 @@ HEIC.
 
 ## 🖼️ Interface
 
-O programa possuí suporte ao tema claro e tema escuro
+O programa possuí suporte ao tema claro e tema escuro:
 
 ### Tema claro
 
@@ -27,7 +27,7 @@ A versão mais recente está disponível na página de Releases.
 ## ✨ Recursos
 
 - Conversão de imagens entre formatos suportados
-- Suporte a HEIC
+- Suporte a HEIC (somente conversão)
 - Suporte a PNG, JPG, JPEG, WEBP e ICO
 - Conversão para ICO com tamanhos personalizados
 - Menu de contexto do Windows
@@ -41,7 +41,7 @@ A versão mais recente está disponível na página de Releases.
 
 | Formato | Entrada | Saída |
 |---|:---:|:---:|
-| HEIC | ✅ | ✅ |
+| HEIC | ✅ | ❌ |
 | PNG | ✅ | ✅ |
 | JPG | ✅ | ✅ |
 | JPEG | ✅ | ✅ |
@@ -55,14 +55,14 @@ A versão mais recente está disponível na página de Releases.
 
 ## 📖 Changelog
 
-As alterações de cada versão podem ser encontradas na página
+As alterações podem ser encontradas na página
 de Releases e no Changelog integrado ao aplicativo.
 
 ## 🐛 Problemas e sugestões
 
 Encontrou um problema ou tem uma sugestão?
 
-Abra uma Issue neste repositório.
+Abra uma **[Issue](https://github.com/skrdkrt069/RageAgainstThePhotos/issues)** neste repositório.
 
 ## 📦 Releases
 
