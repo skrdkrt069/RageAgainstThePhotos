@@ -40,10 +40,10 @@ namespace RageAgainstThePhotos
             btnClearLogs = new Button();
             btnTheme = new Button();
             richLogs = new RichTextBox();
-            linkLabel1 = new LinkLabel();
+            linkLabel = new LinkLabel();
             cmbIcoSize = new ComboBox();
             lblIcoSize = new Label();
-            menuStrip1 = new MenuStrip();
+            menuStrip = new MenuStrip();
             arquivoMenuItem = new ToolStripMenuItem();
             preferênciasToolStripMenuItem = new ToolStripMenuItem();
             editarToolStripMenuItem = new ToolStripMenuItem();
@@ -55,7 +55,7 @@ namespace RageAgainstThePhotos
             changelogToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
             sobreToolStripMenuItem = new ToolStripMenuItem();
-            menuStrip1.SuspendLayout();
+            menuStrip.SuspendLayout();
             SuspendLayout();
             // 
             // paneldrop
@@ -71,7 +71,6 @@ namespace RageAgainstThePhotos
             paneldrop.DragDrop += panelDrop_DragDrop;
             paneldrop.DragEnter += panelDrop_DragEnter;
             paneldrop.DragLeave += paneldrop_DragLeave;
-            paneldrop.Paint += paneldrop_Paint;
             // 
             // lblTitle
             // 
@@ -84,7 +83,6 @@ namespace RageAgainstThePhotos
             lblTitle.TabIndex = 2;
             lblTitle.Text = "⬇ Cole ou arraste a foto ⬇";
             lblTitle.TextAlign = ContentAlignment.MiddleCenter;
-            lblTitle.Click += label1_Click;
             // 
             // cmbFormat
             // 
@@ -123,7 +121,6 @@ namespace RageAgainstThePhotos
             lblFormat.TabIndex = 5;
             lblFormat.Text = "Escolha o formato:";
             lblFormat.TextAlign = ContentAlignment.MiddleCenter;
-            lblFormat.Click += label2_Click;
             // 
             // btnClearLogs
             // 
@@ -164,20 +161,20 @@ namespace RageAgainstThePhotos
             richLogs.Text = "";
             richLogs.WordWrap = false;
             // 
-            // linkLabel1
+            // linkLabel
             // 
-            linkLabel1.ActiveLinkColor = Color.Red;
-            linkLabel1.AutoSize = true;
-            linkLabel1.Cursor = Cursors.Help;
-            linkLabel1.Font = new Font("Times New Roman", 13.69F, FontStyle.Bold);
-            linkLabel1.Location = new Point(-1, 484);
-            linkLabel1.Name = "linkLabel1";
-            linkLabel1.RightToLeft = RightToLeft.No;
-            linkLabel1.Size = new Size(109, 22);
-            linkLabel1.TabIndex = 9;
-            linkLabel1.TabStop = true;
-            linkLabel1.Text = "© skrr 2026";
-            linkLabel1.LinkClicked += linkLabel1_LinkClicked;
+            linkLabel.ActiveLinkColor = Color.Red;
+            linkLabel.AutoSize = true;
+            linkLabel.Cursor = Cursors.Help;
+            linkLabel.Font = new Font("Times New Roman", 13.69F, FontStyle.Bold);
+            linkLabel.Location = new Point(-1, 484);
+            linkLabel.Name = "linkLabel";
+            linkLabel.RightToLeft = RightToLeft.No;
+            linkLabel.Size = new Size(109, 22);
+            linkLabel.TabIndex = 9;
+            linkLabel.TabStop = true;
+            linkLabel.Text = "© skrr 2026";
+            linkLabel.LinkClicked += linkLabel1_LinkClicked;
             // 
             // cmbIcoSize
             // 
@@ -204,52 +201,54 @@ namespace RageAgainstThePhotos
             lblIcoSize.TextAlign = ContentAlignment.MiddleCenter;
             lblIcoSize.Visible = false;
             // 
-            // menuStrip1
+            // menuStrip
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { arquivoMenuItem, sobreMenuItem });
-            menuStrip1.Location = new Point(0, 0);
-            menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(836, 24);
-            menuStrip1.TabIndex = 12;
-            menuStrip1.Text = "menuStrip1";
+            menuStrip.AutoSize = false;
+            menuStrip.Font = new Font("Segoe UI", 10F);
+            menuStrip.Items.AddRange(new ToolStripItem[] { arquivoMenuItem, sobreMenuItem });
+            menuStrip.Location = new Point(0, 0);
+            menuStrip.Name = "menuStrip";
+            menuStrip.Size = new Size(836, 26);
+            menuStrip.TabIndex = 12;
+            menuStrip.Text = "menuStrip";
             // 
             // arquivoMenuItem
             // 
             arquivoMenuItem.DropDownItems.AddRange(new ToolStripItem[] { preferênciasToolStripMenuItem, toolStripSeparator1, sairToolStripMenuItem });
             arquivoMenuItem.Name = "arquivoMenuItem";
-            arquivoMenuItem.Size = new Size(61, 20);
+            arquivoMenuItem.Size = new Size(69, 22);
             arquivoMenuItem.Text = "Arquivo";
             // 
             // preferênciasToolStripMenuItem
             // 
             preferênciasToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { editarToolStripMenuItem, limparToolStripMenuItem });
             preferênciasToolStripMenuItem.Name = "preferênciasToolStripMenuItem";
-            preferênciasToolStripMenuItem.Size = new Size(138, 22);
+            preferênciasToolStripMenuItem.Size = new Size(151, 24);
             preferênciasToolStripMenuItem.Text = "Preferências";
             // 
             // editarToolStripMenuItem
             // 
             editarToolStripMenuItem.Name = "editarToolStripMenuItem";
-            editarToolStripMenuItem.Size = new Size(111, 22);
+            editarToolStripMenuItem.Size = new Size(120, 24);
             editarToolStripMenuItem.Text = "Editar";
             editarToolStripMenuItem.Click += editarToolStripMenuItem_Click;
             // 
             // limparToolStripMenuItem
             // 
             limparToolStripMenuItem.Name = "limparToolStripMenuItem";
-            limparToolStripMenuItem.Size = new Size(111, 22);
+            limparToolStripMenuItem.Size = new Size(120, 24);
             limparToolStripMenuItem.Text = "Limpar";
             limparToolStripMenuItem.Click += limparToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(135, 6);
+            toolStripSeparator1.Size = new Size(148, 6);
             // 
             // sairToolStripMenuItem
             // 
             sairToolStripMenuItem.Name = "sairToolStripMenuItem";
-            sairToolStripMenuItem.Size = new Size(138, 22);
+            sairToolStripMenuItem.Size = new Size(151, 24);
             sairToolStripMenuItem.Text = "Sair";
             sairToolStripMenuItem.Click += sairToolStripMenuItem_Click;
             // 
@@ -257,32 +256,32 @@ namespace RageAgainstThePhotos
             // 
             sobreMenuItem.DropDownItems.AddRange(new ToolStripItem[] { atualizaçõesMenuItem, changelogToolStripMenuItem, toolStripSeparator2, sobreToolStripMenuItem });
             sobreMenuItem.Name = "sobreMenuItem";
-            sobreMenuItem.Size = new Size(50, 20);
+            sobreMenuItem.Size = new Size(56, 22);
             sobreMenuItem.Text = "Ajuda";
             // 
             // atualizaçõesMenuItem
             // 
             atualizaçõesMenuItem.Name = "atualizaçõesMenuItem";
-            atualizaçõesMenuItem.Size = new Size(183, 22);
+            atualizaçõesMenuItem.Size = new Size(203, 24);
             atualizaçõesMenuItem.Text = "Verificar atualizações";
             atualizaçõesMenuItem.Click += atualizaçõesMenuItem_Click;
             // 
             // changelogToolStripMenuItem
             // 
             changelogToolStripMenuItem.Name = "changelogToolStripMenuItem";
-            changelogToolStripMenuItem.Size = new Size(183, 22);
+            changelogToolStripMenuItem.Size = new Size(203, 24);
             changelogToolStripMenuItem.Text = "Changelog";
             changelogToolStripMenuItem.Click += changelogMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(180, 6);
+            toolStripSeparator2.Size = new Size(200, 6);
             // 
             // sobreToolStripMenuItem
             // 
             sobreToolStripMenuItem.Name = "sobreToolStripMenuItem";
-            sobreToolStripMenuItem.Size = new Size(183, 22);
+            sobreToolStripMenuItem.Size = new Size(203, 24);
             sobreToolStripMenuItem.Text = "Sobre";
             sobreToolStripMenuItem.Click += sobreMenuItem_Click;
             // 
@@ -294,7 +293,7 @@ namespace RageAgainstThePhotos
             ClientSize = new Size(836, 505);
             Controls.Add(lblIcoSize);
             Controls.Add(cmbIcoSize);
-            Controls.Add(linkLabel1);
+            Controls.Add(linkLabel);
             Controls.Add(richLogs);
             Controls.Add(btnTheme);
             Controls.Add(btnClearLogs);
@@ -303,17 +302,17 @@ namespace RageAgainstThePhotos
             Controls.Add(cmbFormat);
             Controls.Add(lblTitle);
             Controls.Add(paneldrop);
-            Controls.Add(menuStrip1);
+            Controls.Add(menuStrip);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
-            MainMenuStrip = menuStrip1;
+            MainMenuStrip = menuStrip;
             MaximizeBox = false;
             Name = "RATP";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Rage Against The Photos";
-            menuStrip1.ResumeLayout(false);
-            menuStrip1.PerformLayout();
+            menuStrip.ResumeLayout(false);
+            menuStrip.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -328,10 +327,10 @@ namespace RageAgainstThePhotos
         private Button btnClearLogs;
         private Button btnTheme;
         private RichTextBox richLogs;
-        private LinkLabel linkLabel1;
+        private LinkLabel linkLabel;
         private ComboBox cmbIcoSize;
         private Label lblIcoSize;
-        private MenuStrip menuStrip1;
+        private MenuStrip menuStrip;
         private ToolStripMenuItem arquivoMenuItem;
         private ToolStripMenuItem preferênciasToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator1;

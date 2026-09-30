@@ -55,7 +55,7 @@
             // 
             lblTitle.AutoSize = true;
             lblTitle.Font = new Font("Microsoft Sans Serif", 16F);
-            lblTitle.Location = new Point(57, 117);
+            lblTitle.Location = new Point(64, 117);
             lblTitle.Name = "lblTitle";
             lblTitle.Size = new Size(185, 26);
             lblTitle.TabIndex = 1;
@@ -110,7 +110,7 @@
             lblTitle2.AutoSize = true;
             lblTitle2.Font = new Font("Microsoft Sans Serif", 16F);
             lblTitle2.ForeColor = Color.Indigo;
-            lblTitle2.Location = new Point(238, 117);
+            lblTitle2.Location = new Point(245, 117);
             lblTitle2.Name = "lblTitle2";
             lblTitle2.Size = new Size(80, 26);
             lblTitle2.TabIndex = 8;

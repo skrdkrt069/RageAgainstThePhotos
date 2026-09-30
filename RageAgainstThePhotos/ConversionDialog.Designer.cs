@@ -74,7 +74,7 @@
             // 
             cmbFormat.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbFormat.FormattingEnabled = true;
-            cmbFormat.Items.AddRange(new object[] { "png", "jpg", "jpeg", "ico", "webp" });
+            cmbFormat.Items.AddRange(new object[] { "png", "jpg", "ico", "bmp", "webp", "heic", "avif" });
             cmbFormat.Location = new Point(88, 104);
             cmbFormat.Name = "cmbFormat";
             cmbFormat.Size = new Size(121, 23);
@@ -154,7 +154,7 @@
             Name = "ConversionDialog";
             ShowIcon = false;
             ShowInTaskbar = false;
-            StartPosition = FormStartPosition.CenterScreen;
+            StartPosition = FormStartPosition.CenterParent;
             Text = "Converter Arquivos";
             ResumeLayout(false);
             PerformLayout();

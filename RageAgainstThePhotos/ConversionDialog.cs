@@ -12,9 +12,9 @@ namespace Rage_Against_The_Photos
 {
     public partial class ConversionDialog : Form
     {
-        public string SelectedFormat { get; private set; }
+        public string SelectedFormat { get; private set; } = string.Empty;
 
-        public string SelectedIcoSize { get; private set; }
+        public string SelectedIcoSize { get; private set; } = string.Empty;
 
         public bool RememberChoice { get; private set; }
 
@@ -71,7 +71,7 @@ namespace Rage_Against_The_Photos
         {
             cmbFormat.Items.Clear();
 
-            if (availableFormats.TryGetValue(originalExtension.ToLower(), out string[] formats))
+            if (availableFormats.TryGetValue(originalExtension.ToLower(), out string[]? formats))
             {
                 foreach (string format in formats)
                     cmbFormat.Items.Add(format);

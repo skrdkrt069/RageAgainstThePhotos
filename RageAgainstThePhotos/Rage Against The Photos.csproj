@@ -10,17 +10,23 @@
     <Title>RATP</Title>
     <StartupObject></StartupObject>
     <PackageId>Rage Against The Photos</PackageId>
-    <Version>1.6.9</Version>
+    <Version>1.9.6</Version>
     <Authors>skrr</Authors>
     <Company>Aidstem Team</Company>
     <Product>Rage Against The Photos</Product>
-    <Description>Conversor de fotos, para os tipos: .HEIC, .PNG, .JPG, .JPEG, .WEBP e .ICO (Somente sendo .PNG)</Description>
+    <Description>Conversor de fotos, dos tipos: .HEIC, .PNG, .JPG, .JPEG, .WEBP, .AVIF, .BMP e .ICO (Somente sendo .PNG)</Description>
     <Copyright>♿ 2026 skrr</Copyright>
-    <AssemblyVersion>1.6.9</AssemblyVersion>
-	<FileVersion>1.6.9</FileVersion>
+    <AssemblyVersion>1.9.6</AssemblyVersion>
+	<FileVersion>1.9.6</FileVersion>
 	<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	<PackageReadmeFile>CHANGELOG.md</PackageReadmeFile>
 	<PackageIcon>RATP.bmp</PackageIcon>
+	<PackageProjectUrl></PackageProjectUrl>
+	<RepositoryUrl>https://github.com/skrdkrt069/RageAgainstThePhotos</RepositoryUrl>
+	<PackageTags></PackageTags>
+	<NeutralLanguage>pt-BR</NeutralLanguage>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,6 +53,10 @@
 
   <ItemGroup>
     <None Include="..\..\Prontos\RATP Publish - Stable\RATP.bmp">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="bin\Release\net10.0-windows\LICENSE">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

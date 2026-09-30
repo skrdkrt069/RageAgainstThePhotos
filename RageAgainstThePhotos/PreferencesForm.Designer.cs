@@ -28,94 +28,85 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
-            label2 = new Label();
-            label3 = new Label();
-            label4 = new Label();
-            label5 = new Label();
-            label6 = new Label();
+            lblTitle = new Label();
+            lblHeic = new Label();
+            lblPng = new Label();
+            lblJpg = new Label();
+            lblWebp = new Label();
             cmbHeic = new ComboBox();
             cmbPng = new ComboBox();
             cmbJpg = new ComboBox();
-            cmbJpeg = new ComboBox();
             cmbWebp = new ComboBox();
             btnSave = new Button();
             btnCancel = new Button();
-            label7 = new Label();
+            lblIco = new Label();
             cmbIco = new ComboBox();
+            Bmplbl = new Label();
+            cmbBmp = new ComboBox();
+            cmbAvif = new ComboBox();
+            Aviflbl = new Label();
             SuspendLayout();
             // 
-            // label1
+            // lblTitle
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI Semibold", 15F);
-            label1.ForeColor = Color.MediumPurple;
-            label1.Location = new Point(43, 22);
-            label1.Name = "label1";
-            label1.Size = new Size(235, 28);
-            label1.TabIndex = 0;
-            label1.Text = "Conversões Automáticas";
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI Semibold", 15F);
+            lblTitle.ForeColor = Color.MediumPurple;
+            lblTitle.Location = new Point(43, 22);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(235, 28);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Conversões Automáticas";
             // 
-            // label2
+            // lblHeic
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
-            label2.ForeColor = SystemColors.ControlText;
-            label2.Location = new Point(43, 341);
-            label2.Name = "label2";
-            label2.Size = new Size(54, 19);
-            label2.TabIndex = 1;
-            label2.Text = "HEIC";
+            lblHeic.AutoSize = true;
+            lblHeic.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            lblHeic.ForeColor = SystemColors.ControlText;
+            lblHeic.Location = new Point(44, 328);
+            lblHeic.Name = "lblHeic";
+            lblHeic.Size = new Size(54, 19);
+            lblHeic.TabIndex = 1;
+            lblHeic.Text = "HEIC";
             // 
-            // label3
+            // lblPng
             // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
-            label3.ForeColor = SystemColors.ControlText;
-            label3.Location = new Point(43, 151);
-            label3.Name = "label3";
-            label3.Size = new Size(47, 19);
-            label3.TabIndex = 2;
-            label3.Text = "PNG";
+            lblPng.AutoSize = true;
+            lblPng.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            lblPng.ForeColor = SystemColors.ControlText;
+            lblPng.Location = new Point(44, 186);
+            lblPng.Name = "lblPng";
+            lblPng.Size = new Size(47, 19);
+            lblPng.TabIndex = 2;
+            lblPng.Text = "PNG";
             // 
-            // label4
+            // lblJpg
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
-            label4.ForeColor = SystemColors.ControlText;
-            label4.Location = new Point(43, 199);
-            label4.Name = "label4";
-            label4.Size = new Size(44, 19);
-            label4.TabIndex = 3;
-            label4.Text = "JPG";
+            lblJpg.AutoSize = true;
+            lblJpg.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            lblJpg.ForeColor = SystemColors.ControlText;
+            lblJpg.Location = new Point(44, 234);
+            lblJpg.Name = "lblJpg";
+            lblJpg.Size = new Size(44, 19);
+            lblJpg.TabIndex = 3;
+            lblJpg.Text = "JPG";
             // 
-            // label5
+            // lblWebp
             // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
-            label5.ForeColor = SystemColors.ControlText;
-            label5.Location = new Point(43, 246);
-            label5.Name = "label5";
-            label5.Size = new Size(56, 19);
-            label5.TabIndex = 4;
-            label5.Text = "JPEG";
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
-            label6.ForeColor = SystemColors.ControlText;
-            label6.Location = new Point(43, 293);
-            label6.Name = "label6";
-            label6.Size = new Size(61, 19);
-            label6.TabIndex = 5;
-            label6.Text = "WEBP";
+            lblWebp.AutoSize = true;
+            lblWebp.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            lblWebp.ForeColor = SystemColors.ControlText;
+            lblWebp.Location = new Point(44, 280);
+            lblWebp.Name = "lblWebp";
+            lblWebp.Size = new Size(61, 19);
+            lblWebp.TabIndex = 5;
+            lblWebp.Text = "WEBP";
             // 
             // cmbHeic
             // 
             cmbHeic.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbHeic.FormattingEnabled = true;
-            cmbHeic.Location = new Point(186, 337);
+            cmbHeic.Location = new Point(187, 324);
             cmbHeic.Name = "cmbHeic";
             cmbHeic.Size = new Size(121, 23);
             cmbHeic.TabIndex = 6;
@@ -124,7 +115,7 @@
             // 
             cmbPng.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbPng.FormattingEnabled = true;
-            cmbPng.Location = new Point(185, 147);
+            cmbPng.Location = new Point(186, 182);
             cmbPng.Name = "cmbPng";
             cmbPng.Size = new Size(121, 23);
             cmbPng.TabIndex = 7;
@@ -133,32 +124,23 @@
             // 
             cmbJpg.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbJpg.FormattingEnabled = true;
-            cmbJpg.Location = new Point(185, 195);
+            cmbJpg.Location = new Point(186, 230);
             cmbJpg.Name = "cmbJpg";
             cmbJpg.Size = new Size(121, 23);
             cmbJpg.TabIndex = 8;
-            // 
-            // cmbJpeg
-            // 
-            cmbJpeg.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbJpeg.FormattingEnabled = true;
-            cmbJpeg.Location = new Point(185, 242);
-            cmbJpeg.Name = "cmbJpeg";
-            cmbJpeg.Size = new Size(121, 23);
-            cmbJpeg.TabIndex = 9;
             // 
             // cmbWebp
             // 
             cmbWebp.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbWebp.FormattingEnabled = true;
-            cmbWebp.Location = new Point(185, 289);
+            cmbWebp.Location = new Point(186, 276);
             cmbWebp.Name = "cmbWebp";
             cmbWebp.Size = new Size(121, 23);
             cmbWebp.TabIndex = 10;
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(63, 415);
+            btnSave.Location = new Point(63, 443);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(75, 23);
             btnSave.TabIndex = 11;
@@ -168,7 +150,7 @@
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(186, 415);
+            btnCancel.Location = new Point(186, 443);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(75, 23);
             btnCancel.TabIndex = 12;
@@ -176,45 +158,85 @@
             btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Click += btnCancel_Click;
             // 
-            // label7
+            // lblIco
             // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
-            label7.Location = new Point(43, 104);
-            label7.Name = "label7";
-            label7.Size = new Size(41, 19);
-            label7.TabIndex = 13;
-            label7.Text = "ICO";
+            lblIco.AutoSize = true;
+            lblIco.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            lblIco.Location = new Point(44, 139);
+            lblIco.Name = "lblIco";
+            lblIco.Size = new Size(41, 19);
+            lblIco.TabIndex = 13;
+            lblIco.Text = "ICO";
             // 
             // cmbIco
             // 
             cmbIco.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbIco.FormattingEnabled = true;
-            cmbIco.Location = new Point(185, 100);
+            cmbIco.Location = new Point(186, 135);
             cmbIco.Name = "cmbIco";
             cmbIco.Size = new Size(121, 23);
             cmbIco.TabIndex = 14;
+            // 
+            // Bmplbl
+            // 
+            Bmplbl.AutoSize = true;
+            Bmplbl.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            Bmplbl.Location = new Point(44, 92);
+            Bmplbl.Name = "Bmplbl";
+            Bmplbl.Size = new Size(49, 19);
+            Bmplbl.TabIndex = 15;
+            Bmplbl.Text = "BMP";
+            // 
+            // cmbBmp
+            // 
+            cmbBmp.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbBmp.FormattingEnabled = true;
+            cmbBmp.Location = new Point(186, 88);
+            cmbBmp.Name = "cmbBmp";
+            cmbBmp.Size = new Size(121, 23);
+            cmbBmp.TabIndex = 16;
+            // 
+            // cmbAvif
+            // 
+            cmbAvif.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbAvif.FormattingEnabled = true;
+            cmbAvif.Location = new Point(188, 379);
+            cmbAvif.Name = "cmbAvif";
+            cmbAvif.Size = new Size(121, 23);
+            cmbAvif.TabIndex = 17;
+            // 
+            // Aviflbl
+            // 
+            Aviflbl.AutoSize = true;
+            Aviflbl.Font = new Font("Century Schoolbook", 12F, FontStyle.Bold);
+            Aviflbl.Location = new Point(44, 383);
+            Aviflbl.Name = "Aviflbl";
+            Aviflbl.Size = new Size(52, 19);
+            Aviflbl.TabIndex = 18;
+            Aviflbl.Text = "AVIF";
             // 
             // PreferencesForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(329, 450);
+            ClientSize = new Size(329, 489);
+            Controls.Add(Aviflbl);
+            Controls.Add(cmbAvif);
+            Controls.Add(cmbBmp);
+            Controls.Add(Bmplbl);
             Controls.Add(cmbIco);
-            Controls.Add(label7);
+            Controls.Add(lblIco);
             Controls.Add(btnCancel);
             Controls.Add(btnSave);
             Controls.Add(cmbWebp);
-            Controls.Add(cmbJpeg);
             Controls.Add(cmbJpg);
             Controls.Add(cmbPng);
             Controls.Add(cmbHeic);
-            Controls.Add(label6);
-            Controls.Add(label5);
-            Controls.Add(label4);
-            Controls.Add(label3);
-            Controls.Add(label2);
-            Controls.Add(label1);
+            Controls.Add(lblWebp);
+            Controls.Add(lblJpg);
+            Controls.Add(lblPng);
+            Controls.Add(lblHeic);
+            Controls.Add(lblTitle);
             ForeColor = SystemColors.ControlText;
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             MaximizeBox = false;
@@ -228,20 +250,22 @@
 
         #endregion
 
-        private Label label1;
-        private Label label2;
-        private Label label3;
-        private Label label4;
-        private Label label5;
-        private Label label6;
+        private Label lblTitle;
+        private Label lblHeic;
+        private Label lblPng;
+        private Label lblJpg;
+        private Label lblWebp;
         private ComboBox cmbHeic;
         private ComboBox cmbPng;
         private ComboBox cmbJpg;
-        private ComboBox cmbJpeg;
         private ComboBox cmbWebp;
         private Button btnSave;
         private Button btnCancel;
-        private Label label7;
+        private Label lblIco;
         private ComboBox cmbIco;
+        private Label Bmplbl;
+        private ComboBox cmbBmp;
+        private ComboBox cmbAvif;
+        private Label Aviflbl;
     }
 }

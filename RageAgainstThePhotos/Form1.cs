@@ -1,15 +1,30 @@
 using ImageMagick;
 using Rage_Against_The_Photos;
+using Rage_Against_The_Photos.Properties;
 using System.Diagnostics;
 using System.Drawing.Imaging;
+using System.IO.Pipes;
+using System.Reflection.Metadata;
+using System.Text;
 using System.Text.Json;
+using System.Windows.Forms.Design.Behavior;
 
 namespace RageAgainstThePhotos
 {
+    #region Campos privados
     public partial class RATP : Form
     {
         private string[] startupArgs = Array.Empty<string>();
 
+        private const string PipeName = "RageAgainstThePhotos_FilePipe";
+
+        private readonly List<string> pendingFiles = new();
+
+        private readonly object pendingFilesLock = new();
+
+        private System.Windows.Forms.Timer? incomingFilesTimer;
+
+        private readonly SemaphoreSlim contextMenuConversionLock = new(1, 1);
 
         private string? lastConvertFolder;
 
@@ -17,8 +32,19 @@ namespace RageAgainstThePhotos
 
         private bool settingsRecovered = false;
 
-        bool darkMode = false;
+        private readonly string settingsFolder =
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "RageAgainstThePhotos"
+            );
 
+        private readonly string settingsPath;
+
+        private readonly string lastFolderPath;
+
+    #endregion
+
+    #region Construtor
         public RATP(string[] args)
         {
             InitializeComponent();
@@ -31,13 +57,13 @@ namespace RageAgainstThePhotos
 
             LoadSettings();
 
-            darkMode = settings.DarkTheme;
-
             ApplyTheme();
 
             startupArgs = args;
 
             this.Shown += RATP_Shown;
+
+            StartPipeServer();
 
             this.KeyDown += RATP_KeyDown;
 
@@ -53,8 +79,10 @@ namespace RageAgainstThePhotos
             cmbFormat.Items.Add("png");
             cmbFormat.Items.Add("jpg");
             cmbFormat.Items.Add("webp");
+            cmbFormat.Items.Add("heic");
+            cmbFormat.Items.Add("avif");
+            cmbFormat.Items.Add("bmp");
             cmbFormat.Items.Add("ico");
-            cmbFormat.Items.Add("jpeg");
 
             cmbFormat.SelectedIndex = 0;
 
@@ -70,20 +98,21 @@ namespace RageAgainstThePhotos
                     ext == ".jpg" ||
                     ext == ".jpeg" ||
                     ext == ".webp" ||
-                    ext == ".heic"
+                    ext == ".heic" ||
+                    ext == ".avif" ||
+                    ext == ".bmp" ||
+                    ext == ".ico"
                 )
 
                 {
                     cmbFormat.SelectedItem = "png";
                 }
-                else if (ext == ".ico")
-                {
-                    cmbFormat.SelectedItem = "png";
-                }
-
             }
-        }
 
+        }
+        #endregion
+
+    #region Configuração
         private void LoadSettings()
         {
             if (!File.Exists(settingsPath))
@@ -110,14 +139,6 @@ namespace RageAgainstThePhotos
             }
         }
 
-        private bool TryGetDefaultConversion(string originalExtension, out string selectedFormat)
-        {
-            return settings.DefaultConversions.TryGetValue(
-                originalExtension,
-                out selectedFormat!
-            );
-        }
-
         private void SaveSettings()
         {
             File.WriteAllText(
@@ -129,13 +150,21 @@ namespace RageAgainstThePhotos
             );
         }
 
+        private bool TryGetDefaultConversion(string originalExtension, out string selectedFormat)
+        {
+            if (originalExtension.Equals("jpeg", StringComparison.OrdinalIgnoreCase))
+                originalExtension = "jpg";
+
+            return settings.DefaultConversions.TryGetValue(
+                originalExtension,
+                out selectedFormat!
+            );
+        }
+        #endregion
+
+    #region Inicialização & Eventos da Janela
         private async void RATP_Shown(object? sender, EventArgs e)
         {
-            if (startupArgs.Length > 0)
-            {
-                await ConvertFiles(startupArgs, true);
-            }
-
             if (settingsRecovered)
             {
                 MessageBox.Show(
@@ -145,37 +174,181 @@ namespace RageAgainstThePhotos
                 MessageBoxIcon.Warning
                 );
 
+                settingsRecovered = false;
             }
 
-            settingsRecovered = false;
-        }
-
-        private void panelDrop_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (startupArgs.Length > 0)
             {
-                e.Effect = DragDropEffects.Copy;
+                QueueIncomingFiles(startupArgs);
             }
-
-            paneldrop.BackColor = Color.Lavender;
         }
-        private async void panelDrop_DragDrop(object sender, DragEventArgs e)
+        private async void RATP_KeyDown(object? sender, KeyEventArgs e)
         {
-            if (e.Data != null)
+            if (e.Control && e.KeyCode == Keys.V)
             {
-                string[]? files =
-                    e.Data.GetData(DataFormats.FileDrop) as string[];
-
-                if (files == null)
+                //Arquivos copiados do Explorer
+                if (Clipboard.ContainsFileDropList())
                 {
+                    string[] files =
+                        Clipboard.GetFileDropList()
+                        .Cast<string>()
+                        .ToArray();
+
+                    richLogs.AppendText("📋 Arquivos colados!\n");
+
+                    richLogs.ScrollToCaret();
+
+                    await ConvertFiles(files);
+
                     return;
                 }
 
-                await ConvertFiles(files);
+                //Imagem copiada
+                if (Clipboard.ContainsImage())
+                {
+                    System.Drawing.Image? image = Clipboard.GetImage();
+
+                    if (image == null)
+                    {
+                        return;
+                    }
+
+                    string tempPath = Path.Combine(
+                        Path.GetTempPath(),
+                        $"rath_paste_{Guid.NewGuid()}.png"
+                    );
+
+                    image.Save(tempPath, ImageFormat.Png);
+
+                    image.Dispose();
+
+                    string[] files = { tempPath };
+
+                    richLogs.AppendText("📋 Imagem colada!\n");
+
+                    richLogs.ScrollToCaret();
+
+                    await ConvertFiles(files);
+
+                    return;
+                }
+
+                MessageBox.Show(
+                    "Nenhuma imagem ou arquivo encontrado no Ctrl+V."
+                );
+            }
+        }
+        #endregion
+
+    #region Single Instance & Arquivos Recebidos
+        private async void StartPipeServer()
+        {
+            while (!IsDisposed)
+            {
+                try
+                {
+                    using NamedPipeServerStream server = new NamedPipeServerStream(
+                        PipeName,
+                        PipeDirection.In
+                    );
+
+                    await server.WaitForConnectionAsync();
+
+                    using StreamReader reader = new StreamReader(
+                        server,
+                        Encoding.UTF8
+                    );
+
+                    List<string> receivedFiles = new();
+
+                    string? line;
+
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line))
+                            receivedFiles.Add(line);
+                    }
+
+                    if (receivedFiles.Count > 0 && !IsDisposed)
+                    {
+                        BeginInvoke(() =>
+                        {
+                            QueueIncomingFiles(receivedFiles); //Agrupador
+                        });
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
+                catch
+                {
+                    // Mantém o servidor vivo caso uma chamada morra.
+                }
             }
         }
 
-        //Painel de arrastar e soltar
+        private void QueueIncomingFiles(IEnumerable<string> files)
+        {
+            lock (pendingFilesLock)
+            {
+                pendingFiles.AddRange(files);
+            }
+
+            incomingFilesTimer?.Stop();
+            incomingFilesTimer?.Dispose();
+
+            incomingFilesTimer = new System.Windows.Forms.Timer
+            {
+                Interval = 300
+            };
+
+            incomingFilesTimer.Tick += async (_, _) =>
+            {
+                incomingFilesTimer.Stop();
+                incomingFilesTimer.Dispose();
+                incomingFilesTimer = null;
+
+                string[] filesToProcess;
+
+                lock (pendingFilesLock)
+                {
+                    filesToProcess = pendingFiles
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+
+                    pendingFiles.Clear();
+                }
+
+                if (filesToProcess.Length == 0)
+                    return;
+
+                if (WindowState == FormWindowState.Minimized)
+                {
+                    WindowState = FormWindowState.Normal;
+                }
+
+                Show();
+                BringToFront();
+                Activate();
+
+                await contextMenuConversionLock.WaitAsync();
+
+                try
+                {
+                    await ConvertFiles(filesToProcess, true);
+                }
+                finally
+                {
+                    contextMenuConversionLock.Release();
+                }
+            };
+
+            incomingFilesTimer.Start();
+        }
+        #endregion
+
+    #region Conversão de Imagens
         private async Task ConvertFiles(string[] files, bool fromContextMenu = false)
         {
             richLogs.Clear();
@@ -186,77 +359,82 @@ namespace RageAgainstThePhotos
 
             List<Task> tasks = new List<Task>();
 
+            Dictionary<string, (string Format, string IcoSize)> batchChoices = new();
+
+            HashSet<string> cancelledBatchExtensions =
+                new(StringComparer.OrdinalIgnoreCase);
+
             foreach (string file in files)
             {
                 string extension = Path.GetExtension(file).ToLower();
 
                 string originalExtension = extension.TrimStart('.');
 
-                string selectedFormat;
+                string selectedFormat = "png";
 
-                string icoSize;
+                string icoSize = "Automático";
 
                 if (fromContextMenu)
                 {
-                    if (TryGetDefaultConversion(originalExtension, out string defaultFormat))
+                    string preferenceExtension = originalExtension;
+
+                    if (preferenceExtension.Equals("jpeg", StringComparison.OrdinalIgnoreCase))
+                        preferenceExtension = "jpg";
+
+                    if (cancelledBatchExtensions.Contains(preferenceExtension))
+                        continue;
+
+                    if (batchChoices.TryGetValue(
+                        preferenceExtension,
+                        out var batchChoice))
+                    {
+                        selectedFormat = batchChoice.Format;
+                        icoSize = batchChoice.IcoSize;
+                    }
+
+                    else if (TryGetDefaultConversion(
+                        preferenceExtension,
+                        out string defaultFormat))
                     {
                         selectedFormat = defaultFormat;
-
                         icoSize = "Automático";
+
+                        batchChoices[preferenceExtension] =
+                            (selectedFormat, icoSize);
                     }
+
                     else
                     {
                         using (ConversionDialog dialog = new ConversionDialog(file))
                         {
-                            if (dialog.ShowDialog() != DialogResult.OK)
+                            if (dialog.ShowDialog(this) != DialogResult.OK)
+                            {
+                                cancelledBatchExtensions.Add(preferenceExtension);
                                 continue;
+                            }
 
                             selectedFormat = dialog.SelectedFormat;
-
                             icoSize = dialog.SelectedIcoSize;
+
+                            batchChoices[preferenceExtension] =
+                                (selectedFormat, icoSize);
 
                             if (dialog.RememberChoice)
                             {
-                                settings.DefaultConversions[originalExtension] = selectedFormat;
+                                settings.DefaultConversions[preferenceExtension] =
+                                    selectedFormat;
 
                                 SaveSettings();
                             }
                         }
                     }
                 }
-                else
-                {
-                    selectedFormat = cmbFormat.SelectedItem?.ToString()?.ToLower() ?? "png";
-
-                    icoSize = cmbIcoSize.Text;
-                }
 
                 tasks.Add(Task.Run(async () =>
                 {
                     try
                     {
-                        string outputExtension;
-
-                        if (selectedFormat == "jpg")
-                        {
-                            outputExtension = ".jpg";
-                        }
-                        else if (selectedFormat == "webp")
-                        {
-                            outputExtension = ".webp";
-                        }
-                        else if (selectedFormat == "ico")
-                        {
-                            outputExtension = ".ico";
-                        }
-                        else if (selectedFormat == "jpeg")
-                        {
-                            outputExtension = ".jpeg";
-                        }
-                        else
-                        {
-                            outputExtension = ".png";
-                        }
+                        string outputExtension = "." + selectedFormat;
 
                         string[] supportedFormats =
                         {
@@ -265,9 +443,10 @@ namespace RageAgainstThePhotos
                             ".jpg",
                             ".jpeg",
                             ".ico",
+                            ".avif",
+                            ".bmp",
                             ".webp"
                         };
-
 
                         if (extension == outputExtension)
                         {
@@ -434,27 +613,12 @@ namespace RageAgainstThePhotos
                         {
                             using (MagickImage image = new MagickImage(file))
                             {
-                                if (selectedFormat == "jpg")
-                                {
-                                    image.Format = MagickFormat.Jpg;
-                                }
-                                else if (selectedFormat == "webp")
-                                {
-                                    image.Format = MagickFormat.WebP;
-                                }
-                                else if (selectedFormat == "ico")
+                                if (selectedFormat == "ico")
                                 {
                                     image.Resize(size, size);
                                     image.Format = MagickFormat.Icon;
                                 }
-                                else if (selectedFormat == "jpeg")
-                                {
-                                    image.Format = MagickFormat.Jpeg;
-                                }
-                                else
-                                {
-                                    image.Format = MagickFormat.Png;
-                                }
+
                                 image.Write(output);
                             }
                         });
@@ -514,15 +678,71 @@ namespace RageAgainstThePhotos
             else if (arquivoInvalido)
             {
                 MessageBox.Show(
-                    "Somente png, jpg, jpeg, heic, ico e webp"
+                    "Somente png, jpg, jpeg, heic, ico, avif, bmp e webp"
                 );
             }
         }
+        private void cmbIcoSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
-        //Tema claro/escuro
+        }
+
+        private void comboFormat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            bool icoSelecionado =
+                cmbFormat.Text.Equals("ico", StringComparison.OrdinalIgnoreCase);
+
+            lblIcoSize.Visible = icoSelecionado;
+            cmbIcoSize.Visible = icoSelecionado;
+
+            if (icoSelecionado && cmbIcoSize.SelectedIndex == -1)
+            {
+                cmbIcoSize.SelectedIndex = 0;
+            }
+        }
+        #endregion
+
+    #region Arrastar & Soltar
+        private void panelDrop_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            paneldrop.BackColor = Color.Lavender;
+        }
+
+        private async void panelDrop_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data != null)
+            {
+                string[]? files =
+                    e.Data.GetData(DataFormats.FileDrop) as string[];
+
+                if (files == null)
+                {
+                    return;
+                }
+
+                await ConvertFiles(files);
+            }
+        }
+        private void paneldrop_DragLeave(object sender, EventArgs e)
+        {
+            if (settings.DarkTheme)
+                paneldrop.BackColor = Color.FromArgb(35, 35, 35);
+            else
+            {
+                paneldrop.BackColor = SystemColors.Control;
+            }
+        }
+        #endregion
+
+    #region Tema
         private void ApplyTheme()
         {
-            if (darkMode)
+            if (settings.DarkTheme)
             {
                 this.BackColor = Color.FromArgb(25, 25, 25);
 
@@ -543,16 +763,16 @@ namespace RageAgainstThePhotos
                 lblFormat.ForeColor = Color.White;
                 lblIcoSize.ForeColor = Color.White;
 
-                menuStrip1.BackColor = Color.FromArgb(45, 45, 45);
-                menuStrip1.ForeColor = Color.White;
+                menuStrip.BackColor = Color.FromArgb(45, 45, 45);
+                menuStrip.ForeColor = Color.White;
                 arquivoMenuItem.BackColor = Color.FromArgb(45, 45, 45);
                 arquivoMenuItem.ForeColor = Color.White;
                 sobreMenuItem.BackColor = Color.FromArgb(45, 45, 45);
                 sobreMenuItem.ForeColor = Color.White;
 
-                linkLabel1.LinkColor = Color.White;
-                linkLabel1.ActiveLinkColor = Color.Red;
-                linkLabel1.ForeColor = Color.Blue;
+                linkLabel.LinkColor = Color.White;
+                linkLabel.ActiveLinkColor = Color.Red;
+                linkLabel.ForeColor = Color.Blue;
             }
             else
             {
@@ -575,35 +795,31 @@ namespace RageAgainstThePhotos
                 lblFormat.ForeColor = Color.MediumPurple;
                 lblIcoSize.ForeColor = Color.MediumPurple;
 
-                menuStrip1.ForeColor = Color.Black;
-                menuStrip1.BackColor = SystemColors.Control;
+                menuStrip.ForeColor = Color.Black;
+                menuStrip.BackColor = SystemColors.Control;
                 arquivoMenuItem.ForeColor = Color.Black;
                 arquivoMenuItem.BackColor = SystemColors.Control;
                 sobreMenuItem.ForeColor = Color.Black;
                 sobreMenuItem.BackColor = SystemColors.Control;
 
-                linkLabel1.LinkColor = Color.Blue;
-                linkLabel1.ActiveLinkColor = Color.Black;
-                linkLabel1.ForeColor = Color.Black;
+                linkLabel.LinkColor = Color.Blue;
+                linkLabel.ActiveLinkColor = Color.Black;
+                linkLabel.ForeColor = Color.Black;
             }
         }
-
-        private void paneldrop_Paint(object sender, PaintEventArgs e)
+        private void btnDarkTheme_Click(object sender, EventArgs e)
         {
+            settings.DarkTheme = !settings.DarkTheme;
 
+            SaveSettings();
+
+            ApplyTheme();
+
+            btnTheme.Text = settings.DarkTheme ? "off" : "on";
         }
+        #endregion
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void paneldrop_DragLeave(object sender, EventArgs e)
-        {
-            paneldrop.BackColor = Color.WhiteSmoke;
-        }
-
-        //Botão "Abrir pasta"
+    #region Pastas, Logs & Controles
         private void btnOpenFolder_Click(object sender, EventArgs e)
         {
             if (lastConvertFolder != null && Directory.Exists(lastConvertFolder))
@@ -620,9 +836,10 @@ namespace RageAgainstThePhotos
         {
             btnOpenFolder.BackColor = Color.MediumPurple;
         }
+
         private void btnOpenFolder_MouseLeave(object sender, EventArgs e)
         {
-            if (darkMode)
+            if (settings.DarkTheme)
             {
                 btnOpenFolder.BackColor = Color.FromArgb(60, 60, 60);
             }
@@ -632,101 +849,10 @@ namespace RageAgainstThePhotos
             }
         }
 
-        //Último caminho registrado da pasta
-        private readonly string settingsFolder =
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "RageAgainstThePhotos"
-            );
-
-        private readonly string settingsPath;
-
-        private readonly string lastFolderPath;
-
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void btnClearLogs_Click_1(object sender, EventArgs e)
         {
             richLogs.Clear();
         }
-
-        //"Lâmpada"
-        private void btnDarkTheme_Click(object sender, EventArgs e)
-        {
-            darkMode = !darkMode;
-
-            settings.DarkTheme = darkMode;
-
-            SaveSettings();
-
-            ApplyTheme();
-
-            btnTheme.Text = darkMode ? "off" : "on";
-        }
-
-        //Converter com ctrl+v
-        private async void RATP_KeyDown(object? sender, KeyEventArgs e)
-        {
-            if (e.Control && e.KeyCode == Keys.V)
-            {
-                //Arquivos copiados do Explorer
-                if (Clipboard.ContainsFileDropList())
-                {
-                    string[] files =
-                        Clipboard.GetFileDropList()
-                        .Cast<string>()
-                        .ToArray();
-
-                    richLogs.AppendText("📋 Arquivos colados!\n");
-
-                    richLogs.ScrollToCaret();
-
-                    await ConvertFiles(files);
-
-                    return;
-                }
-
-                //Imagem copiada
-                if (Clipboard.ContainsImage())
-                {
-                    System.Drawing.Image? image = Clipboard.GetImage();
-
-                    if (image == null)
-                    {
-                        return;
-                    }
-
-                    string tempPath = Path.Combine(
-                        Path.GetTempPath(),
-                        $"rath_paste_{Guid.NewGuid()}.png"
-                    );
-
-                    image.Save(tempPath, ImageFormat.Png);
-
-                    image.Dispose();
-
-                    string[] files = { tempPath };
-
-                    richLogs.AppendText("📋 Imagem colada!\n");
-
-                    richLogs.ScrollToCaret();
-
-                    await ConvertFiles(files);
-
-                    return;
-                }
-
-                MessageBox.Show(
-                    "Nenhuma imagem ou arquivo encontrado no Ctrl+V."
-                );
-            }
-        }
-
-        //Link no rodapé
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start(new ProcessStartInfo
@@ -735,31 +861,14 @@ namespace RageAgainstThePhotos
                 UseShellExecute = true
             });
         }
+        #endregion
 
-        private void cmbIcoSize_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void comboFormat_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            bool icoSelecionado =
-                cmbFormat.Text.Equals("ico", StringComparison.OrdinalIgnoreCase);
-
-            lblIcoSize.Visible = icoSelecionado;
-            cmbIcoSize.Visible = icoSelecionado;
-
-            if (icoSelecionado && cmbIcoSize.SelectedIndex == -1)
-            {
-                cmbIcoSize.SelectedIndex = 0;
-            }
-        }
-
+    #region Menus & Preferências
         private void editarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using (PreferencesForm form = new PreferencesForm(settings))
             {
-                if (form.ShowDialog() == DialogResult.OK)
+                if (form.ShowDialog(this) == DialogResult.OK)
                 {
                     SaveSettings();
                 }
@@ -817,55 +926,90 @@ namespace RageAgainstThePhotos
 
         private void sobreMenuItem_Click(object sender, EventArgs e)
         {
-            using (AboutForm form = new AboutForm())
+            using (AboutForm form = new AboutForm(this.settings))
             {
-                form.ShowDialog();
+                form.ShowDialog(this);
             }
         }
 
         private void changelogMenuItem_Click(object sender, EventArgs e)
         {
-            using (ChangelogForm form = new ChangelogForm())
+            using (ChangelogForm form = new ChangelogForm(this.settings))
             {
-                form.ShowDialog();
+                form.ShowDialog(this);
             }
         }
+        #endregion
 
+    #region Atualizações
         private async Task CheckForUpdates()
         {
-            Version currentVersion = new Version(Application.ProductVersion);
-
-            Version latestVersion = new Version("1.7.0");
-
-            if (latestVersion > currentVersion)
+            try
             {
-                MessageBox.Show(
-                    $"Uma nova versão está disponível!\n\n" +
-                    $"Versão atual: {currentVersion}\n" +
-                    $"Nova versão: {latestVersion}\n\n" +
-                    "Deseja atualizar?",
-                    "Verificar Atualizações",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question
-                );
+                UpdateService updateService = new UpdateService();
+
+                UpdateInfo latestVersion =
+                    await updateService.GetLatestVersionAsync();
+
+                string productVersion =
+                    Application.ProductVersion.TrimStart('v').Split('+')[0];
+
+                Version currentVersion =
+                    Version.Parse(productVersion);
+
+                Version availableVersion =
+                    Version.Parse(latestVersion.Version);
+
+                if (availableVersion > currentVersion)
+                {
+                    DialogResult result = MessageBox.Show(
+                        $"Uma nova versão do Rage Against The Photos está disponível!\n\n" +
+                        $"Versão atual: {currentVersion}\n" +
+                        $"Nova versão: {availableVersion}\n\n" +
+                        $"Deseja abrir a página de download?",
+                        "Verificar Atualizações",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Information
+                    );
+
+                    if (result == DialogResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = latestVersion.DownloadUrl,
+                                UseShellExecute = true
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"Você já está usando a versão mais recente.\n\n" +
+                        $"Versão atual: {currentVersion}",
+                        "Verificar Atualizações",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                }
             }
-            else
+            catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Você já está usando a versão mais recente",
+                    $"Não foi possível verificar atualizações.\n\n" +
+                    $"Detalhes: {ex.Message}",
                     "Verificar Atualizações",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
+                    MessageBoxIcon.Warning
                 );
             }
-
-            await Task.CompletedTask;
         }
 
         private async void atualizaçõesMenuItem_Click(object sender, EventArgs e)
         {
             await CheckForUpdates();
         }
-
+        #endregion
     }
 }

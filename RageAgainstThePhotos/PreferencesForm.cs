@@ -21,12 +21,15 @@ namespace Rage_Against_The_Photos
 
             this.settings = settings;
 
+            ApplyTheme();
+
             LoadFormats(cmbHeic, "heic");
             LoadFormats(cmbPng, "png");
             LoadFormats(cmbJpg, "jpg");
-            LoadFormats(cmbJpeg, "jpeg");
             LoadFormats(cmbWebp, "webp");
             LoadFormats(cmbIco, "ico");
+            LoadFormats(cmbAvif, "Avif");
+            LoadFormats(cmbBmp, "Bmp");  
 
             LoadPreferences();
         }
@@ -34,24 +37,26 @@ namespace Rage_Against_The_Photos
         private readonly Dictionary<string, string[]> availableFormats =
                 new()
            {
-                { "heic", new[] { "png", "jpg", "jpeg", "webp" } },
+                { "png",  new[] { "jpg", "webp", "ico", "avif", "bmp", "ico" } },
 
-                { "png",  new[] { "jpg", "jpeg", "webp", "ico" } },
+                { "bmp", new[] { "png", "jpg", "webp", "avif"} },
 
-                { "jpg",  new[] { "png", "jpeg", "webp" } },
+                { "jpg",  new[] { "png", "webp", "avif", "bmp" } },
 
-                { "jpeg", new[] { "png", "jpg", "webp" } },
+                { "ico",  new[] { "png"} },
 
-                { "webp", new[] { "png", "jpg", "jpeg" } },
+                { "avif", new[] { "png", "jpg", "webp", "bmp"} },
 
-                { "ico",  new[] { "png", "jpg", "jpeg", "webp" } }
+                { "heic", new[] { "png", "jpg", "webp", "avif", "bmp" } },
+
+                { "webp", new[] { "png", "jpg", "avif", "bmp" } }
            };
 
         private void LoadFormats(ComboBox combo, string originalExtension)
         {
             combo.Items.Clear();
 
-            if (availableFormats.TryGetValue(originalExtension.ToLower(), out string[] formats))
+            if (availableFormats.TryGetValue(originalExtension.ToLower(), out string[]? formats))
             {
                 foreach (string format in formats)
                     combo.Items.Add(format);
@@ -65,14 +70,15 @@ namespace Rage_Against_The_Photos
             SetComboValue(cmbHeic, "heic");
             SetComboValue(cmbPng, "png");
             SetComboValue(cmbJpg, "jpg");
-            SetComboValue(cmbJpeg, "jpeg");
             SetComboValue(cmbWebp, "webp");
             SetComboValue(cmbIco, "ico");
+            SetComboValue(cmbAvif, "Avif");
+            SetComboValue(cmbBmp, "Bmp");
         }
 
         private void SetComboValue(ComboBox combo, string extension)
         {
-            if (settings.DefaultConversions.TryGetValue(extension, out string format))
+            if (settings.DefaultConversions.TryGetValue(extension, out string? format))
             {
                 combo.SelectedItem = format;
             }
@@ -101,15 +107,48 @@ namespace Rage_Against_The_Photos
             SaveComboValue("png", cmbPng);
             SaveComboValue("jpg", cmbJpg);
             SaveComboValue("heic", cmbHeic);
-            SaveComboValue("jpeg", cmbJpeg);
             SaveComboValue("webp", cmbWebp);
             SaveComboValue("ico", cmbIco);
+            SaveComboValue("Avif", cmbAvif);
+            SaveComboValue("Bmp", cmbBmp);
 
             DialogResult = MessageBox.Show(
                 "Pronto! Preferências salvas nas configurações."
            );
             
             Close();
+        }
+
+        private void ApplyTheme()
+        {
+            if (settings.DarkTheme)
+            {
+                this.BackColor = Color.FromArgb(25, 25, 25);
+
+                foreach (Control control in Controls)
+                {
+                    if (control is Label label)
+                    {
+                        label.ForeColor = Color.White;
+                        
+                    }
+                }
+            }
+            else
+            {
+                this.BackColor = SystemColors.Control;
+
+                foreach (Control control in Controls)
+                {
+                    if (control is Label label)
+                    {
+                        {
+                            label.ForeColor = Color.Black;
+                            lblTitle.ForeColor = Color.MediumPurple;
+                        }
+                    }
+                }
+            }
         }
     }
 }
