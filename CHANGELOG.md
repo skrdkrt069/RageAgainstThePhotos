@@ -102,7 +102,7 @@ thx to Marcela & Helena <3
 
 / / / / / / / / / / / / / / / / / / / / / / / / / / /
 
-[1.9.6] - 25-09-2026
+## [1.9.6] - 25-09-2026
 ### Adicionado
 - Cancelar uma escolha durante um lote ignora os demais arquivos daquele mesmo formato.
 - Restaura e traz sua janela para frente ao receber arquivos pelo menu de contexto.
