@@ -106,3 +106,24 @@ thx to Marcela & Helena <3
 - Cancelamento da conversão não cria mais a pasta "Fotos Convertidas" por engano;
 - .Json é descorrompido automaticamente, caso haja problemas;
 - Avisos sobre redução de qualidade não aparecendo.
+
+## [1.9.6] - 25-09-2026
+### Adicionado
+- Cancelar uma escolha durante um lote ignora os demais arquivos daquele mesmo formato.
+- Restaura e traz sua janela para frente ao receber arquivos pelo menu de contexto.
+- AVIF e BMP agora podem ser utilizados como formatos de entrada e saída.
+- Arquivos do mesmo formato são agrupados durante conversões em lote.
+- Melhorado o suporte a conversões em lote pelo menu de contexto.
+
+### Melhorado
+- Melhorada a exibição da versão do programa, removendo informações internas de build.
+- Adicionada proteção contra múltiplos lotes de conversão executados simultaneamente.
+- JPG e JPEG agora compartilham a mesma preferência de conversão.
+- Simplificada a lógica interna de conversão de formatos.
+- Melhorada a organização interna do código.
+
+###Corrigido
+- Corrigido o comportamento que abria várias instâncias do RATP ao converter múltiplos arquivos pelo menu de contexto.
+- Corrigido o posicionamento e foco do diálogo de conversão quando o RATP já estava aberto.
+- Corrigido o comando de menu de contexto para arquivos WEBP.
+- Corrigidos avisos relacionados a valores nulos.
