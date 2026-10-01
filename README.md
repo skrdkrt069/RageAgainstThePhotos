@@ -28,7 +28,7 @@ A versão mais recente está disponível na página de Releases.
 
 - Conversão de imagens entre formatos suportados
 - Suporte a HEIC (somente conversão)
-- Suporte a PNG, JPG, JPEG, WEBP e ICO
+- Suporte a PNG, JPG, JPEG, WEBP, AVIF, BMP e ICO
 - Conversão para ICO com tamanhos personalizados
 - Menu de contexto do Windows
 - Preferências persistentes
@@ -42,10 +42,12 @@ A versão mais recente está disponível na página de Releases.
 | Formato | Entrada | Saída |
 |---|:---:|:---:|
 | HEIC | ✅ | ❌ |
+| JPEG | ✅ | ❌ |
+| WEBP | ✅ | ✅ |
+| AVIF | ✅ | ✅ |
 | PNG | ✅ | ✅ |
 | JPG | ✅ | ✅ |
-| JPEG | ✅ | ✅ |
-| WEBP | ✅ | ✅ |
+| BMP | ✅ | ✅ |
 | ICO | ✅ | ✅ |
 
 ## 💻 Requisitos
